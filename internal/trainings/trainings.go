@@ -21,20 +21,28 @@ type Training struct {
 func (t *Training) Parse(datastring string) error {
 	parts := strings.Split(datastring, ",")
 	if len(parts) != 3 {
-		return fmt.Errorf("неверный формат строки тренировки: %s", datastring)
+		return fmt.Errorf("неверный формат строки тренировки")
 	}
 
-	steps, err := strconv.Atoi(strings.TrimSpace(parts[0]))
+	steps, err := strconv.Atoi(parts[0])
 	if err != nil {
 		return fmt.Errorf("ошибка парсинга шагов: %w", err)
 	}
+
+	if steps <= 0 {
+		return fmt.Errorf("количество шагов должно быть больше нуля")
+	}
 	t.Steps = steps
 
-	t.TrainingType = strings.TrimSpace(parts[1])
+	t.TrainingType = parts[1]
 
-	duration, err := time.ParseDuration(strings.TrimSpace(parts[2]))
+	duration, err := time.ParseDuration(parts[2])
 	if err != nil {
 		return fmt.Errorf("ошибка парсинга длительности: %w", err)
+	}
+
+	if duration <= 0 {
+		return fmt.Errorf("продолжительность должна быть больше нуля")
 	}
 	t.Duration = duration
 
@@ -61,6 +69,7 @@ func (t Training) ActionInfo() (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+	// Добавлен \n в самый конец строки
+	return fmt.Sprintf("Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 		t.TrainingType, t.Duration.Hours(), distance, speed, calories), nil
 }
